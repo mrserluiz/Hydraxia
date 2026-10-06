@@ -1,5 +1,5 @@
 id: HYDRAXIA
-version: 0.2.2
+version: 0.2.3-terra2
 author: "Jaddot"
 
 #If you find any bugs or any features you wish to include in this pack, 
@@ -20,7 +20,7 @@ author: "Jaddot"
 generator: NOISE_3D
 
 addons:
-  biome-provider-pipeline: "1.+"
+  biome-provider-pipeline: "2.+"
   biome-provider-single: "1.+"
   biome-provider-extrusion: "1.+"
   chunk-generator-noise-3d: "1.+"
