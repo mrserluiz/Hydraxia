@@ -1,0 +1,49 @@
+name: Build Hydraxia Community Pack ZIP
+
+on:
+  push:
+    branches: [terra2-rebuild]
+    paths:
+      - '.github/workflows/build-community-pack.yml'
+      - 'pack.yml'
+      - 'biome_distribution/**'
+      - 'biomes/**'
+      - 'features/**'
+      - 'functions/**'
+      - 'palettes/**'
+      - 'samplers/**'
+      - 'structures/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate and package Community Pack
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f pack.yml
+          mkdir -p dist
+          zip -q -r dist/HYDRAXIA.zip pack.yml biome_distribution biomes features functions palettes samplers structures
+          unzip -Z -1 dist/HYDRAXIA.zip | grep -qx 'pack.yml'
+          if unzip -Z -1 dist/HYDRAXIA.zip | grep -q '^Hydraxia-terra2-rebuild/'; then
+            echo 'Unexpected parent directory' >&2
+            exit 1
+          fi
+          unzip -t dist/HYDRAXIA.zip
+          sha256sum dist/HYDRAXIA.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: HYDRAXIA-community-pack
+          path: dist/HYDRAXIA.zip
+          if-no-files-found: error
+      - name: Publish test release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create hydraxia-terra2-test dist/HYDRAXIA.zip --title 'Hydraxia Terra2 test pack' --notes 'Community Pack ZIP with pack.yml at archive root. Compatibility is not yet validated on a Paper server.' --target "${GITHUB_SHA}" --prerelease --latest=false --clobber
